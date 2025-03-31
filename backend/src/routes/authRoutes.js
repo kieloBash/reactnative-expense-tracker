@@ -10,7 +10,7 @@ const generateToken = (userId) => {
 
 router.post("/register", async (req, res) => {
   try {
-    console.log(req.body);
+    console.log("REGISTER");
     const { email, username, password } = req.body;
 
     if (!email || !username || !password)
@@ -56,8 +56,38 @@ router.post("/register", async (req, res) => {
     return res.status(500).json({ message: "Internal server error!" });
   }
 });
-router.post("/login", (req, res) => {
-  res.send("login");
+router.post("/login", async (req, res) => {
+  try {
+    console.log("LOGIN");
+    const { username, password } = req.body;
+    console.log({ username, password });
+
+    if (!username || !password)
+      return res.status(400).json({ message: "All fields are required" });
+
+    const existingUser = await User.findOne({ $or: [{ username }] });
+
+    if (!existingUser)
+      return res.status(400).json({ message: "Invalid credentials" });
+
+    const isPasswordCorrect = await existingUser.comparePassword(password);
+
+    if (!isPasswordCorrect)
+      return res.status(400).json({ message: "Invalid credentials" });
+
+    const token = generateToken(existingUser._id);
+
+    res.status(200).json({
+      token,
+      user: {
+        _id: existingUser._id,
+        username,
+      },
+    });
+  } catch (error) {
+    console.log("An error occured during login: ", error);
+    return res.status(500).json({ message: "Internal server error!" });
+  }
 });
 
 export default router;

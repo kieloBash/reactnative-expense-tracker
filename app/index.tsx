@@ -10,7 +10,7 @@ export default function Index() {
         flex: 1,
       }}
     >
-      <Link href={"/(tabs)/(settings)/_index"}>click</Link>
+      <Link href={"/(auth)/login"}>login</Link>
     </View>
   );
 }
